@@ -94,13 +94,22 @@ foreach (var item in categories)
 var posts = await blogRepo.GetPopularArticAsync(3);
 
 //Xuat danh sach ra man hinh
-foreach (var post in posts)
-{
-    Console.WriteLine("ID:      {0}", post.Id);
-    Console.WriteLine("Title:   {0}", post.Title);
-    Console.WriteLine("View:    {0}", post.ViewCount);
-    Console.WriteLine("Date:    {0:MM/dd/yyyy}", post.PostedDate);
-    Console.WriteLine("Author:  {0}", post.Author.FullName);
-    Console.WriteLine("Category:{0}", post.Category.Name);
-    Console.WriteLine("".PadRight(80, '-'));
-}
+
+//foreach (var post in posts)
+//{
+//    Console.WriteLine("ID:      {0}", post.Id);
+//    Console.WriteLine("Title:   {0}", post.Title);
+//    Console.WriteLine("View:    {0}", post.ViewCount);
+//    Console.WriteLine("Date:    {0:MM/dd/yyyy}", post.PostedDate);
+//    Console.WriteLine("Author:  {0}", post.Author.FullName);
+//    Console.WriteLine("Category:{0}", post.Category.Name);
+//    Console.WriteLine("".PadRight(80, '-'));
+//}
+
+
+//a. Tìm một thẻ (Tag) theo tên định danh (slug)
+var tags = await blogRepo.GetTagAsyn("google");
+Console.WriteLine("{0,-5} {1,-50} {2,10}", "ID", "Name", "Description","UrlSlug");
+Console.WriteLine("{0,-5} {1,-50} {2,10}",tags.Id,tags.Name,tags.Description, tags.UrlSlug);
+
+//Lấy danh sách tất cả các thẻ (Tag) kèm theo số bài viết chứa thẻ đó

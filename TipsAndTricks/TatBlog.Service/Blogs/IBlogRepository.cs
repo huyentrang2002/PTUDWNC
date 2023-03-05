@@ -29,7 +29,7 @@ public interface IBlogRepository
         int postId,
         CancellationToken cancellationToken = default);
 
-    //lay anh sach chuyen muc va so luong bai viet
+    //lay danh sach chuyen muc va so luong bai viet
     //nam thuoc tung chuyen muc/ chu de
     Task<IList<Category>> GetCatergoriesAsync(
         bool showOnMenu = false,
@@ -42,4 +42,17 @@ public interface IBlogRepository
         IPagingParams pagingParams,
         CancellationToken cancellationToken = default);
 
+    //tim 1 the (tag) co ten dinh danh la slug
+    Task<Tag> GetTagAsyn(
+       string slug,
+       CancellationToken cancellationToken = default);
+
+    //Lấy danh sách tất cả các thẻ (Tag) kèm theo số bài viết chứa thẻ đó.
+    //Kết quả trả về kiểu IList<TagItem>
+    Task<IList<TagItem>> GetListTagAsync(string tag,
+            CancellationToken cancellationToken = default);
+
+    //Xóa một thẻ theo mã cho trước.
+    Task DeleteTagByIDAcsyn(int? id,
+            CancellationToken cancellationToken = default);
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Linq.Dynamic.Core;
 using TatBlog.Core.Contracts;
 using TatBlog.Core.DTO;
@@ -15,6 +16,9 @@ namespace TatBlog.Service.Blogs
         {
             _context = context;
         }
+
+        //Tìm 1 bài viết có tên định danh là slug
+        //được đăng vào tháng, năm
         public async Task<Post> GetPostAsyn(
             int year,
             int month,
@@ -129,5 +133,61 @@ namespace TatBlog.Service.Blogs
                 .ToListAsync(cancellationToken);
 
         }
+
+        //Tìm một thẻ (Tag) theo tên định danh (slug)
+        public Task<Tag> GetTagAsyn(string slug,
+            CancellationToken cancellationToken = default)
+        {
+            var tagQuery = _context.Set<Tag>();
+            return tagQuery.Where(t => t.UrlSlug.Contains(slug))
+                .FirstOrDefaultAsync(cancellationToken);           
+        }
+
+        
+        // Lấy danh sách tất cả các thẻ (Tag) kèm theo số bài viết chứa thẻ đó
+        public async Task<IList<TagItem>> GetListTagAsync(string tag,
+            CancellationToken cancellationToken = default)
+        {
+            var tagQuery = _context.Set<Tag>()
+                //moi tag se thuoc ve nhieu bai post khac nhau
+                //muon biet cac bai post thuoc ve 1 tag trong ef can anh xa cac bai post
+                // bang cach su dung ham include va chi ra thuoc tinh post can anh xa
+                .Include(t =>t.Posts)
+                .Select(x => new TagItem()
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    UrlSlug = x.UrlSlug,
+                    Description = x.Description,
+                    PostCount = x.Posts.Count(p => p.Published),
+                });
+
+            return await tagQuery.ToListAsync(cancellationToken);
+        }
+
+        // Xóa một thẻ theo mã cho trước
+        public async Task DeleteTagByIDAcsyn(int? id,
+            CancellationToken cancellationToken = default)
+        {
+            var tagQuery = await _context.Set<Tag>().FindAsync(id);
+            if (tagQuery != null)
+            {
+                Tag tagcontext = tagQuery;
+                _context.Tags.Remove(tagcontext);
+
+                await _context.SaveChangesAsync(cancellationToken);                
+            }            
+                
+        }
+
+        //Tìm một chuyên mục(Category) theo tên định danh(slug)
+        public Task<Category> GetCategoriesBySlugAsync(string slug,
+            CancellationToken cancellationToken = default)
+        {
+            var tagQuery = _context.Set<Category>();
+            return tagQuery.Where(t => t.UrlSlug.Contains(slug))
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+
     }
 }

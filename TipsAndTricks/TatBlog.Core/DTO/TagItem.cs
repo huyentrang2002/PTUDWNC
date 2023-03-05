@@ -1,4 +1,5 @@
-﻿namespace TatBlog.Core.DTO
+﻿//b.Tạo lớp DTO có tên là TagItem để chứa các thông tin về thẻ và số lượng bài viết chứa thẻ đó.
+namespace TatBlog.Core.DTO
 {
     public class TagItem
     {
