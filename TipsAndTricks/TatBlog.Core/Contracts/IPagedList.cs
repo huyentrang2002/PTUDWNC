@@ -17,7 +17,7 @@ namespace TatBlog.Core.Contracts
         int PageSize { get; }
 
         //kiem tra co trang truoc hay khong
-        bool HasPreiousPage { get; }
+        bool HasPreviousPage { get; }
 
         //kiem tra co trang tiep theo hay khong
         bool HasNextPage { get; }

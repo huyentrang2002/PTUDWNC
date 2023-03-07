@@ -5,18 +5,29 @@ namespace TatBlog.Data.Contexts;
 public class BlogDbContext : DbContext
 {
     public DbSet<Author> Authors { get; set; }
-    public DbSet<Category> Catergories { get; set; }
+    public DbSet<Category> Categories { get; set; }
     public DbSet<Post> Posts{ get; set; }
     public DbSet<Tag> Tags { get; set; }
 
-    protected override void OnConfiguring(
-        DbContextOptionsBuilder optionsBuilder)
+    public DbSet<Subscriber> Subscribers { get; set; }
+
+
+    public BlogDbContext(DbContextOptions<BlogDbContext> options)
+        : base(options)
     {
-        optionsBuilder.UseSqlServer(@"Server=localhost\SQLEXPRESS;Database=TatBlog;
-                                    Trusted_Connection=false;MultipleActiveResultSets=true;
-                                    TrustServerCertificate=True;User ID=sa;pwd=123");
     }
 
+    public BlogDbContext()
+    {
+    }
+
+    //protected override void OnConfiguring(
+    //    DbContextOptionsBuilder optionsBuilder)
+    //{
+    //    optionsBuilder.UseSqlServer(@"Server=localhost\SQLEXPRESS;Database=TatBlog;
+    //                                Trusted_Connection=false;MultipleActiveResultSets=true;
+    //                                TrustServerCertificate=True;User ID=sa;pwd=123");
+    //}
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(

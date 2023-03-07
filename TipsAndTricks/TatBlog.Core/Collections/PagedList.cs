@@ -44,7 +44,7 @@ namespace TatBlog.Core.Collections
             }
         }
 
-        public bool HasPreiousPage => PageIndex > 0;
+        public bool HasPreviousPage => PageIndex > 0;
 
         public bool HasNextPage => (PageIndex < (PageCount - 1));
 

@@ -1,0 +1,14 @@
+﻿<!-- tạo view đê trình bày kết quả trả về từ các Action-->
+@model IPagedList<Post>
+@{
+	ViewData["PagTitle"] = "Trang chủ";
+}
+
+<div class="p-4"> 
+	@foreach (var postItem in Model)
+	{
+		<partial name = "_PostList" model="postItem"/>
+	}
+	<partial name = "_Pager" model="@Model"/>
+
+</div>

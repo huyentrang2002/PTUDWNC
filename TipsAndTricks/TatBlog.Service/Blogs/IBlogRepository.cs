@@ -31,10 +31,10 @@ public interface IBlogRepository
 
     //lay danh sach chuyen muc va so luong bai viet
     //nam thuoc tung chuyen muc/ chu de
-    Task<IList<Category>> GetCatergoriesAsync(
+    Task<IList<Category>> GetCategoriesAsync(
         bool showOnMenu = false,
         CancellationToken cancellationToken= default);
-    Task<List<CategoryItem>> GetCategoriesAsync(
+    Task<List<CategoryItem>> GetCategoryItemsAsync(
         bool showOnMenu = false,
         CancellationToken cancellationToken = default);
 
@@ -55,4 +55,60 @@ public interface IBlogRepository
     //Xóa một thẻ theo mã cho trước.
     Task DeleteTagByIDAcsyn(int? id,
             CancellationToken cancellationToken = default);
+
+    //Tìm một chuyên mục theo mã số cho trước.
+    Task<Category> GetCategoryByIdAsync
+        (int id, CancellationToken cancellationToken = default);
+
+    //Thêm hoặc cập nhật một chuyên mục/chủ đề.
+    Task AddOrUpdateCategoryAsync(Category category,
+        CancellationToken cancellationToken = default);
+
+    //Xóa một chuyên mục theo mã số cho trước
+    Task DeleteCategoryByIDAcsyn(int? id,
+            CancellationToken cancellationToken = default);
+
+    //Kiểm tra tên định danh (slug) của một chuyên mục đã tồn tại hay chưa
+    Task<bool> CheckCategorySlugExisted(string slug);
+
+    //Lấy và phân trang danh sách chuyên mục, kết quả trả về kiểu IPagedList<CategoryItem
+    Task<IPagedList<CategoryItem>> GetPagedCategoriesAsync
+        (IPagingParams pagingParams, CancellationToken cancellationToken = default);
+
+    //k. Đếm số lượng bài viết trong N tháng gần nhất. N là tham số đầu vào. Kết 
+    //quả là một danh sách các đối tượng chứa các thông tin sau: Năm, Tháng, Số
+    //bài viết.
+
+
+    //Tìm một bài viết theo mã số
+    Task<Post> GetPostByIdAsync(int id, CancellationToken cancellationToken = default);
+
+    //Thêm hay cập nhật một bài viết
+    Task AddOrUpdatePostAsync(Post post, CancellationToken cancellationToken = default);
+
+    //Chuyển đổi trạng thái Published của bài viết
+    Task ChangePostStatusAsync(int id, CancellationToken cancellationToken = default);
+
+    //Lấy ngẫu nhiên N bài viết. N là tham số đầu vào
+    Task<IList<Post>> GetRandomPostAsync(int n, CancellationToken cancellationToken = default);
+
+    //CODE MAU
+    Task<Author> GetAuthorAsync(string slug, CancellationToken cancellationToken = default);
+    Task<Author> GetAuthorByIdAsync(int authorId);
+    Task<IList<AuthorItem>> GetAuthorsAsync(CancellationToken cancellationToken = default);
+
+    Task<IList<Post>> GetPostsAsync(PostQuery condition, int pageNumber, int pageSize, CancellationToken cancellationToken = default);
+
+    Task<IPagedList<Post>> GetPagedPostsAsync(
+        PostQuery condition,
+        int pageNumber = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default);
+
+   
+    
 }
+
+
+
+
