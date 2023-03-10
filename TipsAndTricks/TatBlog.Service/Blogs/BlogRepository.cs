@@ -257,6 +257,7 @@ namespace TatBlog.Service.Blogs
             return tagQuery.Where(t => t.UrlSlug.Contains(slug))
                 .FirstOrDefaultAsync(cancellationToken);
         }
+        
 
         //1f. Tìm một chuyên mục theo mã số cho trước.
         public async Task<Category> GetCategoryByIdAsync
@@ -405,7 +406,7 @@ namespace TatBlog.Service.Blogs
 
             if (!string.IsNullOrWhiteSpace(condition.CategorySlug))
             {
-                posts = posts.Where(x => x.Category.UrlSlug == condition.CategorySlug);
+                posts = posts.Where(x => x.Category.UrlSlug.Contains(condition.CategorySlug));
             }
 
             if (condition.AuthorId > 0)

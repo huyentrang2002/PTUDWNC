@@ -13,6 +13,8 @@ namespace TatBlog.Core.Contracts
         //chi so trang hien tai(bat dau tu 0)
         int PageIndex { get; }
 
+        int PageNumber { get; }
+
         //so luong phan tu toi da tren 1 trang
         int PageSize { get; }
 

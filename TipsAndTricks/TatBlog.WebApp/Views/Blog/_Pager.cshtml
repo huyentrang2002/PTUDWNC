@@ -1,10 +1,9 @@
 ﻿@model IPagedList<Post>
 
 @{
-  var postQuery = (ViewData["PostQuery"] as PostQuery) ?? new PostQuery();
+  var postQuery = (ViewBag.Postquery as PostQuery) ?? new PostQuery();
   var actionName = "Index";
   var slug = "";
-  var pagedList = Model as PagedList<Post>;
 
   if (!string.IsNullOrWhiteSpace(postQuery.AuthorSlug))
   {
@@ -20,123 +19,55 @@
   }
 }
 
-@{
-    if (pagedList.IsFirstPage) return;
-
-    if (!pagedList.IsLastPage) 
-      pagedList.PageNumber = pagedList.TotalItemCount;
-
-    // Các trang hiện thị trong điều hướng
-    List<int> pagesRanges = new List<int>();    
-
-    int delta      = 5;             // Số trang mở rộng về mỗi bên trang hiện tại     
-    int remain     = delta * 2;     // Số trang hai bên trang hiện tại
-
-    pagesRanges.Add(pagedList.PageNumber);
-    // Các trang phát triển về hai bên trang hiện tại
-    for (int i = 1; i <= delta; i++)
-    {
-        if (pagedList.PageNumber + i  <= pagedList.TotalItemCount) {
-            pagesRanges.Add(pagedList.PageNumber + i); 
-            remain --;
+@if(Model.PageCount>1)
+{
+    <div class="text-center my -4">
+        @if(Model.HasPreviousPage)
+        {
+            <a asp-controller="Blog"
+               asp-action="@actionName"
+               asp-route-slug="@slug"
+               asp-route-k="@postQuery.Keyword"
+               asp-route-p="@(Model.PageNumber-1)"
+               asp-router-ps="@Model.PageSize"
+               class="btn btn-info">
+               <i class="fa fa-arrow-left"></i>
+               Trang truoc
+            </a>
         }
-               
-        if (pagedList.PageNumber - i >= 1) {
-            pagesRanges.Insert(0, pagedList.PageNumber - i);
-            remain --;
+        else
+        {
+            <button type="button"
+                    class="btn btn-outline-secondary"
+                    disabled>
+                    <i class="fa fa-arrow-left"></i>
+                    Trang truoc
+            </button>
         }
-            
-    }    
-    // Xử lý thêm vào các trang cho đủ remain 
-    //(xảy ra ở đầu mút của khoảng trang không đủ trang chèn  vào)
-    if (remain > 0) {
-        if (pagesRanges[0] == 1) {
-            for (int i = 1; i <= remain; i++)
-            {
-                if (pagesRanges.Last() + 1 <= pagedList.TotalItemCount) {
-                    pagesRanges.Add(pagesRanges.Last() + 1);
-                }
-            }
-        }
-        else {
-            for (int i = 1; i <= remain; i++)
-            {
-                if (pagesRanges.First() - 1 > 1) {
-                    pagesRanges.Insert(0, pagesRanges.First() - 1);
-                }
-            }
-        }
-    }
-}
 
-@* PHÁT SINH HTML*@
-
-<ul class="pagination">
-    <!-- Previous page link -->
-    @if (pagedList.HasPreviousPage)
-    {
-      <li class="page-item">
-        <a class="page-link"
-          asp-controller="Blog"
-          asp-action="@actionName"
-          asp-route-slug="@slug"
-          asp-route-k="@postQuery.Keyword"
-          asp-route-p="@(pagedList.PageNumber - 1)"
-          asp-route-ps="@pagedList.PageSize">
-          Trang trước
-        </a>
-      </li>
-    }
-    else
-    {
-      <li class="page-item disabled">
-          <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Trang trước</a>
-      </li>
-    }
-      
-    <!-- Numbered page links -->
-    @foreach (var pageitem in pagesRanges)
-    {
-        if (pageitem != pagedList.PageNumber) {
-            <li class="page-item">
-              <a class="page-link"
-                asp-controller="Blog"
+        @if(Model.HasNextPage)
+        {
+            <a  asp-controller="Blog"
                 asp-action="@actionName"
                 asp-route-slug="@slug"
                 asp-route-k="@postQuery.Keyword"
-                asp-route-p="@pageitem"
-                asp-route-ps="@pagedList.PageSize">
-                @pageitem
-              </a>
-            </li>
-        }   
-        else 
-        {
-            <li class="page-item active" aria-current="page">
-                <a class="page-link" href="#">@pageitem</a>
-            </li>
-        }
-    }
+                asp-route-p="@(Model.PageNumber+1)"
+                asp-route-ps="@Model.PageSize"
+                class="btn btn-info">
+                Trang sau
+                <i class="fa fa-arrow-right"></i>
 
-    <!-- Next page link -->
-    @if (pagedList.HasNextPage)
-    {
-      <li class="page-item">
-        <a class="page-link"
-          asp-controller="Blog"
-          asp-action="@actionName"
-          asp-route-slug="@slug"
-          asp-route-k="@postQuery.Keyword"
-          asp-route-p="@(pagedList.PageNumber + 1)"
-          asp-route-ps="@pagedList.PageSize">
-          Trang sau
-        </a>
-      </li>
-    }
-    else
-    {
-      <li class="page-item disabled">
-        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Trang sau</a>
-      </li>
-    }
-</ul>
+            </a>
+        }
+        else
+        {
+            <button type="button"
+                    class="btn btn-outline-secondary"
+                    disabled>
+                    Trang sau
+                <i class="fa fa-arrow-right"></i>
+               
+            </button>
+        }
+    </div>
+}

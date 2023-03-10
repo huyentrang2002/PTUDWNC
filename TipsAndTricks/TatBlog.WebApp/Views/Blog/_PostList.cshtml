@@ -14,22 +14,43 @@
       </div>
       <div class="col-md-8">
         <div class="card-body">
+           <a asp-controller = "Blog"
+           asp-action="Post"
+           asp-route-slug ="@Model.UrlSlug"
+           asp-area ="">
           <h5 class="card-title">
-            @Model.Title
+                @Model.Title
           </h5>
+          </a>
           <p class="card-text">
             <small class="text-muted">
               Tác giả:
             </small>
-            <span class="text-primary">
+           @* <a href ="/blog/@Model.Author.UrlSlug">*@
+           @* <span class="text-primary">
               @Model.Author.FullName
-            </span>
+            </span>*@
+            <a asp-controller = "Blog"
+		        asp-action = "Author"
+		        asp-route-slug = "@Model.Author.UrlSlug"
+                asp-area =""
+		        title = "Tag :@Model.Author.FullName"
+		        class = "link-primary">
+		        @Model.Author.FullName
+	        </a>
+
+            </a>
             <small class="text-muted">
               Chủ đề:
             </small>
+            <a asp-controller = "Blog"
+            asp-action="Category"
+            asp-route-slug ="@Model.Category.UrlSlug"
+            asp-area="">
             <span class="text-primary">
               @Model.Category.Name
             </span>
+            </a>
           </p>
           <p class="card-text">
             @Html.Raw(Model.ShortDescription)
@@ -42,6 +63,7 @@
                 title="@Model.Title"
                 asp-controller="Blog"
                 asp-action="Post"
+                asp-area =""
                 asp-route-year="@Model.PostedDate.Year"
                 asp-route-month="@Model.PostedDate.Month"
                 asp-route-day="@Model.PostedDate.Day"

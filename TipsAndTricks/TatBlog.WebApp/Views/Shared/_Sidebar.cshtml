@@ -1,15 +1,13 @@
-﻿<!--<div class="my-4">-->
+﻿<div class="my-4">
 
 <!--form tim kiem -->
-<!-- <partial name="_SearchForm"/> -->
+<partial name="_SearchForm"/>
 
 <h1>
 	Tìm kiếm bài viết
 </h1>
 <!-- Các chuyên mục/ chủ đề-->
-<h1>
-	Các chủ đề
-</h1>
+@await Component.InvokeAsync("CategoriesWidget")
 <!--Top bai viet nổi bật-->
 <h1>
 	Bài viết nổi bật
