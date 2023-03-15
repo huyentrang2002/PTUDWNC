@@ -6,6 +6,7 @@ using TatBlog.Core.DTO;
 using TatBlog.Core.Entities;
 using TatBlog.Data.Contexts;
 using TatBlog.Service.Extensions;
+using TatBlog.Services.Extensions;
 
 namespace TatBlog.Service.Blogs
 {
@@ -135,8 +136,74 @@ namespace TatBlog.Service.Blogs
 
         }
 
+        public async Task<Post> CreateOrUpdatePostAsync(
+        Post post, IEnumerable<string> tags,
+        CancellationToken cancellationToken = default)
+        {
+            if (post.Id > 0)
+            {
+                await _context.Entry(post).Collection(x => x.Tags).LoadAsync(cancellationToken);
+            }
+            else
+            {
+                post.Tags = new List<Tag>();
+            }
+
+            var validTags = tags.Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(x => new
+                {
+                    Name = x,
+                    Slug = x.GenerateSlug()
+                })
+                .GroupBy(x => x.Slug)
+                .ToDictionary(g => g.Key, g => g.First().Name);
+
+
+            foreach (var kv in validTags)
+            {
+                if (post.Tags.Any(x => string.Compare(x.UrlSlug, kv.Key, StringComparison.InvariantCultureIgnoreCase) == 0)) continue;
+
+                var tag = await GetTagAsync(kv.Key, cancellationToken) ?? new Tag()
+                {
+                    Name = kv.Value,
+                    Description = kv.Value,
+                    UrlSlug = kv.Key
+                };
+
+                post.Tags.Add(tag);
+            }
+
+            post.Tags = post.Tags.Where(t => validTags.ContainsKey(t.UrlSlug)).ToList();
+
+            if (post.Id > 0)
+                _context.Update(post);
+            else
+                _context.Add(post);
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return post;
+        }
+
+        public async Task<Category> CreateOrUpdateCategoryAsync(
+        Category category, CancellationToken cancellationToken = default)
+        {
+            if (category.Id > 0)
+            {
+                _context.Set<Category>().Update(category);
+            }
+            else
+            {
+                _context.Set<Category>().Add(category);
+            }
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return category;
+        }
+
         //1a. Tìm một thẻ (Tag) theo tên định danh (slug)
-        public Task<Tag> GetTagAsyn(string slug,
+        public Task<Tag> GetTagAsync(string slug,
             CancellationToken cancellationToken = default)
         {
             var tagQuery = _context.Set<Tag>();
@@ -340,6 +407,22 @@ namespace TatBlog.Service.Blogs
             return Postid;
         }
 
+        public async Task<Post> GetPostByIdAsync(int id, bool published = false, CancellationToken cancellationToken = default)
+        {
+            IQueryable<Post> postQuery = _context.Set<Post>()
+                                     .Include(p => p.Category)
+                                     .Include(p => p.Author)
+                                     .Include(p => p.Tags);
+
+            if (published)
+            {
+                postQuery = postQuery.Where(x => x.Published);
+            }
+
+            return await postQuery.Where(p => p.Id.Equals(id))
+                                  .FirstOrDefaultAsync(cancellationToken);
+        }
+
         //1m. Thêm hay cập nhật một bài viết
         public async Task AddOrUpdatePostAsync(Post post,
             CancellationToken cancellationToken = default)
@@ -450,5 +533,7 @@ namespace TatBlog.Service.Blogs
 
             return posts;
         }
+
+        
     }
 }

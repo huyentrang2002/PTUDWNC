@@ -108,8 +108,8 @@ var posts = await blogRepo.GetPopularArticAsync(3);
 
 
 //a. Tìm một thẻ (Tag) theo tên định danh (slug)
-var tags = await blogRepo.GetTagAsyn("google");
-Console.WriteLine("{0,-5} {1,-50} {2,10}", "ID", "Name", "Description","UrlSlug");
-Console.WriteLine("{0,-5} {1,-50} {2,10}",tags.Id,tags.Name,tags.Description, tags.UrlSlug);
+//var tags = await blogRepo.GetTagAsyn("google");
+//Console.WriteLine("{0,-5} {1,-50} {2,10}", "ID", "Name", "Description","UrlSlug");
+//Console.WriteLine("{0,-5} {1,-50} {2,10}",tags.Id,tags.Name,tags.Description, tags.UrlSlug);
 
 //Lấy danh sách tất cả các thẻ (Tag) kèm theo số bài viết chứa thẻ đó

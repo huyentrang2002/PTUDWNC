@@ -42,8 +42,14 @@ public interface IBlogRepository
         IPagingParams pagingParams,
         CancellationToken cancellationToken = default);
 
+    Task<Post> CreateOrUpdatePostAsync(
+        Post post, IEnumerable<string> tags,
+        CancellationToken cancellationToken = default);
+    Task<Category> CreateOrUpdateCategoryAsync(
+        Category category, CancellationToken cancellationToken = default);
+
     //tim 1 the (tag) co ten dinh danh la slug
-    Task<Tag> GetTagAsyn(
+    Task<Tag> GetTagAsync(
        string slug,
        CancellationToken cancellationToken = default);
 
@@ -85,6 +91,7 @@ public interface IBlogRepository
 
     //Tìm một bài viết theo mã số
     Task<Post> GetPostByIdAsync(int id, CancellationToken cancellationToken = default);
+    Task<Post> GetPostByIdAsync(int id, bool published = false, CancellationToken cancellationToken = default);
 
     //Thêm hay cập nhật một bài viết
     Task AddOrUpdatePostAsync(Post post, CancellationToken cancellationToken = default);
@@ -108,8 +115,10 @@ public interface IBlogRepository
         int pageSize = 10,
         CancellationToken cancellationToken = default);
 
-   
-    
+
+
+
+
 }
 
 
