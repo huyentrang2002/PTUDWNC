@@ -103,6 +103,8 @@ public interface IBlogRepository
     Task<IList<Post>> GetRandomPostAsync(int n, CancellationToken cancellationToken = default);
 
     //CODE MAU
+    Task<bool> TogglePublishedFlagAsync(
+        int postId, CancellationToken cancellationToken = default);
     Task<Author> GetAuthorAsync(string slug, CancellationToken cancellationToken = default);
     Task<Author> GetAuthorByIdAsync(int authorId);
     Task<IList<AuthorItem>> GetAuthorsAsync(CancellationToken cancellationToken = default);
@@ -114,7 +116,8 @@ public interface IBlogRepository
         int pageNumber = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default);
-
+    Task<bool> DeletePostAsync(
+       int postId, CancellationToken cancellationToken = default);
 
 
 

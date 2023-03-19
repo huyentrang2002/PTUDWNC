@@ -3,7 +3,7 @@
 namespace TatBlog.Service.Media;
 public class LocalFileSystemMediaManager : IMediaManager
 {
-    private const string PicturesFolder = "upload/picture/{0}{1}";
+    private const string PicturesFolder = "uploads/pictures/{0}{1}";
     private readonly ILogger<LocalFileSystemMediaManager> _logger;
 
     public LocalFileSystemMediaManager(

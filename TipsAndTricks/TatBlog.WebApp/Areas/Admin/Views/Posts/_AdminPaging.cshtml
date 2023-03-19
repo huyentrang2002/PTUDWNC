@@ -24,8 +24,8 @@
     <div class="text-center my -4">
         @if(Model.HasPreviousPage)
         {
-            <a asp-area=""
-               asp-controller="Blog"
+            <a asp-area="Admin"
+            asp-controller="Posts"
                asp-action="@actionName"
                asp-route-slug="@slug"
                asp-route-k="@postQuery.Keyword"
@@ -33,7 +33,7 @@
                asp-router-ps="@Model.PageSize"
                class="btn btn-info">
                <i class="fa fa-arrow-left"></i>
-               Trang truoc
+               Trang trước
             </a>
         }
         else
@@ -42,14 +42,14 @@
                     class="btn btn-outline-secondary"
                     disabled>
                     <i class="fa fa-arrow-left"></i>
-                    Trang truoc
+                    Trang trước
             </button>
         }
 
         @if(Model.HasNextPage)
         {
-            <a  asp-area=""
-                asp-controller="Blog"
+            <a asp-area="Admin"
+                asp-controller="Posts"
                 asp-action="@actionName"
                 asp-route-slug="@slug"
                 asp-route-k="@postQuery.Keyword"

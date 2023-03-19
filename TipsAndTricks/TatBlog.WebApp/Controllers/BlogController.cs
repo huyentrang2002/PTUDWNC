@@ -19,7 +19,7 @@ public class BlogController : Controller
     public async Task<IActionResult> Index(
         [FromQuery(Name = "k")] string keywork = null,
         [FromQuery(Name = "p")] int pageNumber = 1,
-        [FromQuery(Name = "ps")] int pageSize = 2)
+        [FromQuery(Name = "ps")] int pageSize = 10)
     {
         //tao doi tuong chua cac dieu kien truy van 
         var postQuery = new PostQuery()

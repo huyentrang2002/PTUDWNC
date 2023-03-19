@@ -95,6 +95,20 @@ namespace TatBlog.Service.Blogs
                 .ToListAsync(cancellationToken);
         }
 
+        //chuyen published thanh unpublished
+        public async Task<bool> TogglePublishedFlagAsync(
+        int postId, CancellationToken cancellationToken = default)
+        {
+            var post = await _context.Set<Post>().FindAsync(postId);
+
+            if (post is null) return false;
+
+            post.Published = !post.Published;
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return post.Published;
+        }
+
         public async Task<IPagedList<TagItem>> GetPagedTagsAsync(
             IPagingParams pagingParams,
             CancellationToken cancellationToken = default)
@@ -407,20 +421,36 @@ namespace TatBlog.Service.Blogs
             return Postid;
         }
 
-        public async Task<Post> GetPostByIdAsync(int id, bool published = false, CancellationToken cancellationToken = default)
-        {
-            IQueryable<Post> postQuery = _context.Set<Post>()
-                                     .Include(p => p.Category)
-                                     .Include(p => p.Author)
-                                     .Include(p => p.Tags);
+        //public async Task<Post> GetPostByIdAsync(int id, bool published = false, CancellationToken cancellationToken = default)
+        //{
+        //    IQueryable<Post> postQuery = _context.Set<Post>()
+        //                             .Include(p => p.Category)
+        //                             .Include(p => p.Author)
+        //                             .Include(p => p.Tags);
 
-            if (published)
+        //    if (published)
+        //    {
+        //        postQuery = postQuery.Where(x => x.Published);
+        //    }
+
+        //    return await postQuery.Where(p => p.Id.Equals(id))
+        //                          .FirstOrDefaultAsync(cancellationToken);
+        //}
+
+        public async Task<Post> GetPostByIdAsync(
+        int postId, bool includeDetails = false,
+        CancellationToken cancellationToken = default)
+        {
+            if (!includeDetails)
             {
-                postQuery = postQuery.Where(x => x.Published);
+                return await _context.Set<Post>().FindAsync(postId);
             }
 
-            return await postQuery.Where(p => p.Id.Equals(id))
-                                  .FirstOrDefaultAsync(cancellationToken);
+            return await _context.Set<Post>()
+                .Include(x => x.Category)
+                .Include(x => x.Author)
+                .Include(x => x.Tags)
+                .FirstOrDefaultAsync(x => x.Id == postId, cancellationToken);
         }
 
         //1m. Thêm hay cập nhật một bài viết
@@ -534,6 +564,16 @@ namespace TatBlog.Service.Blogs
             return posts;
         }
 
-        
+        public async Task<bool> DeletePostAsync(int postId, CancellationToken cancellationToken = default)
+        {
+            var post = await _context.Set<Post>().FindAsync(postId);
+
+            if (post is null) return false;
+
+            _context.Set<Post>().Remove(post);
+            var rowsCount = await _context.SaveChangesAsync(cancellationToken);
+
+            return rowsCount > 0;
+        }
     }
 }

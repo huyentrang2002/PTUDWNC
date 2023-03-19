@@ -20,6 +20,7 @@
 				<th>Tác giả</th>
 				<th>Chủ đề</th>
 				<th>Xuất bản</th>
+				<th>Xóa</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -46,12 +47,39 @@
 						@post.Category.Name
 					</td>
 					<td>
-						@(post.Published ? "có":"không" )
+						<a asp-area="Admin"
+						asp-controller="Posts"
+						asp-action="TogglePub"
+						asp-route-id="@post.Id" type="button" class="btn btn-sm @(post.Published ? "btn-success" : "btn-danger")">
+                            @if (post.Published)
+                            {
+                                <i class="fa fa-check">
+									<p>Xuất bản</p>
+
+								</i>
+                            }
+                            else
+                            {
+                                <i class="fa fa-times">
+									<p>Chưa xuất bản</p>
+								</i>
+                            }
+                        </a>
 					</td>
+					<td>
+						<a asp-area="Admin"
+						asp-controller="Posts"
+						asp-action="Delete"
+						asp-route-id="@post.Id" class="btn btn-sm">
+						<p>Xóa</p>
+						</a>
+					</td>
+
 				</tr>
 			}
 		</tbody>
 	</table>
+	<partial name="_AdminPaging" model="@postList"></partial>
 }
 else
 {
@@ -59,3 +87,4 @@ else
 		Không tìm thấy bài viết nào
 	</h1>
 }
+

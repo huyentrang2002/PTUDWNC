@@ -14,10 +14,10 @@
       </div>
       <div class="col-md-8">
         <div class="card-body">
-           <a asp-controller = "Blog"
+           <a asp-area =""
+           asp-controller = "Blog"
            asp-action="Post"
-           asp-route-slug ="@Model.UrlSlug"
-           asp-area ="">
+           asp-route-slug ="@Model.UrlSlug">
           <h5 class="card-title">
                 @Model.Title
           </h5>

@@ -20,6 +20,7 @@ public class PostsController : Controller
     private readonly IMediaManager _mediaManager;
     private readonly IMapper _mapper;
 
+
     public PostsController(
         ILogger<PostsController> logger,
         IBlogRepository blogRepository,
@@ -50,9 +51,14 @@ public class PostsController : Controller
             Value = c.Id.ToString()
         });
     }
-    public async Task<IActionResult> Index(PostFilterModel model)
+    public async Task<IActionResult> Index(
+        PostFilterModel model,
+        [FromQuery(Name = "p")] int pageNumber = 1,
+        [FromQuery(Name = "ps")] int pageSize = 10)
     {
         _logger.LogInformation("tạo điều kiện truy vấn");
+
+       
 
         //sử dụng mapster để tạo đối tượng PostQuery từ đối tượng PostFilterModel model
         var postQuery = _mapper.Map<PostQuery>(model);
@@ -68,7 +74,7 @@ public class PostsController : Controller
         //    Month = model.Month
         //};
         ViewBag.PostList = await _blogRepository
-            .GetPagedPostsAsync(postQuery, 1, 10);
+            .GetPagedPostsAsync(postQuery, pageNumber, pageSize);
 
         _logger.LogInformation("chuẩn bị cơ sở dũ liệu cho ViewModel");
 
@@ -95,6 +101,18 @@ public class PostsController : Controller
         return View(model);
 
     }
+    public async Task<IActionResult> TogglePub(int id = 0)
+    {
+         await _blogRepository.TogglePublishedFlagAsync(id);
+        return RedirectToAction(nameof(Index));
+    }
+
+    public async Task<IActionResult> Delete(int id = 0)
+    {
+        await _blogRepository.DeletePostAsync(id);
+        return RedirectToAction(nameof(Index));
+    }
+
     private async Task PopulatePostEditModelAsync(PostEditModel model)
     {
         var authors = await _blogRepository.GetAuthorsAsync();
@@ -116,7 +134,7 @@ public class PostsController : Controller
     //xử lý việc lưu các thay đổi mà người dùng đã nhập vào
     [HttpPost]
     public async Task<IActionResult> Edit(
-        IValidator<PostEditModel> postValidator,
+        [FromServices] IValidator<PostEditModel> postValidator,
         PostEditModel model)
     {
         // sử dụng FluentValidation cho việc kiểm tra dữ liệu đầu vào
@@ -160,7 +178,7 @@ public class PostsController : Controller
                 model.ImageFile.ContentType);
 
             //nếu lưu thành công, xóa tập tin hình ảnh cũ(nếu có)
-            if (string.IsNullOrWhiteSpace(newImagePath))
+            if (!string.IsNullOrWhiteSpace(newImagePath))
             {
                 await _mediaManager.DeleteFileAsync(post.ImageUrl);
                 post.ImageUrl = newImagePath;
@@ -172,6 +190,8 @@ public class PostsController : Controller
 
         return RedirectToAction(nameof(Index));
     }
+
+    
 
     // kiểm tra xem UrlSlug đã được sử dụng cho một bài viết khác hay chưa
     [HttpPost]
