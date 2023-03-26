@@ -104,7 +104,7 @@ public class BlogController : Controller
             TagSlug = slug
         };
 
-        //truy van tac gia theo dieu kien da tao
+        //truy van the theo dieu kien da tao
         var tags = await _blogRepository
             .GetPagedPostsAsync(postQuery, pageNumber, pageSize);
 
@@ -114,6 +114,61 @@ public class BlogController : Controller
         return View(tags);
     }
     #endregion
+
+    #region Tìm Post theo slug
+    //public async Task<IActionResult> Post(
+    //    [FromRoute(Name = "year")] int year,
+    //    [FromRoute(Name = "month")] int month,
+    //    [FromRoute(Name = "slug")] string slug,
+    //    [FromQuery(Name = "p")] int pageNumber = 1,
+    //    [FromQuery(Name = "ps")] int pageSize = 10)
+    //{
+    //    var postQuery = new PostQuery()
+    //    {
+    //        //trang thái hiển thị
+    //        PublishedOnly = true,
+    //        PostYear = year,
+    //        PostMonth = month,
+    //        Slug = slug
+    //    };
+
+    //    //truy van tac gia theo dieu kien da tao
+    //    var tags = await _blogRepository
+    //        .GetPagedPostsAsync(postQuery, pageNumber, pageSize);
+
+    //    //luu lai dieu kien truy van de hien thi trong View
+    //    ViewBag.PostQuery = postQuery;
+
+    //    return View(tags);
+    //}
+    #endregion
+
+    #region hiển thị post được đăng theo thang/nam
+
+    public async Task<IActionResult> PostInfo(
+    [FromRoute(Name = "year")] int year,
+    [FromRoute(Name = "month")] int month,
+    [FromRoute(Name = "day")] int day,
+    [FromRoute(Name = "slug")] string slug = null)
+
+    {
+    //    var postQuery = new PostQuery()
+    //    {
+    //        //trang thái hiển thị
+    //        PublishedOnly = true,
+    //        TagSlug = slug
+    //    };
+
+        //truy van bau viet theo dieu kien da tao
+        var postList = await _blogRepository
+            .GetPostAsyn(year, month, slug);
+      //  ViewBag.PostQuery = postQuery;
+
+        return View(postList);
+
+    }
+    #endregion
+
 
 
 

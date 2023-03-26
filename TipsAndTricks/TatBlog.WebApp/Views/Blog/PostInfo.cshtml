@@ -1,0 +1,20 @@
+﻿@model Post
+<div class="main">
+    <div class="card-body">
+        <a>
+            <h5 class="card-title">
+                @Model.Title;
+            </h5>
+            <h6>
+                @Model.Id,
+                @Model.ShortDescription,
+                @Model.PostedDate,
+                @Model.ViewCount,
+                @Model.Category.Name,
+                @Model.Author.FullName;
+            </h6>
+            
+        </a>
+        </div>
+
+</div>

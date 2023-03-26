@@ -1,0 +1,21 @@
+﻿@model IList<TagItem>
+
+<div class="mb-4">
+    <h3 class="text-success mb-2">
+        Hiển thị danh sách các thẻ (tag)
+    </h3>
+
+    <ul class="list-group">
+        @foreach (var item in Model)
+        {
+            <li class="list-group-item">
+                <a asp-area=""
+                    asp-controller="Blog"
+                   asp-action="Tag"
+                   asp-route-slug="@item.UrlSlug">         
+                    @item.UrlSlug             
+                </a>
+            </li>
+        }
+    </ul>
+</div>

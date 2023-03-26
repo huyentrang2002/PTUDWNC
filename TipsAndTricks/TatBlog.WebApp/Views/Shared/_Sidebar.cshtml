@@ -3,22 +3,17 @@
 <!--form tim kiem -->
 <partial name="_SearchForm"/>
 
-<h1>
-	Tìm kiếm bài viết
-</h1>
 <!-- Các chuyên mục/ chủ đề-->
 @await Component.InvokeAsync("CategoriesWidget")
-<!--Top bai viet nổi bật-->
-<h1>
-	Bài viết nổi bật
-</h1>
-<!--Đăng kí nhan tin mới-->
-<h1>
-	Đăng kí nhận tin mới
-</h1>
+<!--Top bài viết nổi bật nhất-->
+@await Component.InvokeAsync("FeaturedPosts")
+<!--Bài viết ngẫu nhiên-->
+@await Component.InvokeAsync("RandomPosts")
 <!-- Tag cloud-->
-<h1>
-	Tag Cloud
-</h1>
+@await Component.InvokeAsync("TagCloud")
+<!-- Best Author-->
+@*@await Component.InvokeAsync("BestAuthors")
+*@<!--Đăng kí nhận tin mới-->
+
 
 </div>

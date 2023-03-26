@@ -1,0 +1,17 @@
+﻿@using TatBlog.Core.Contracts;
+@model IPagedList<Post>
+
+@{
+    ViewData["PageTitle"] = "FeaturedPosts";
+    var postQuery = (ViewBag.PostQuery as PostQuery) ?? new PostQuery();
+}
+
+<div class="p-4">
+
+
+    @foreach (var postItem in Model)
+    {
+        <partial name="_PostList" model="postItem" />
+    }
+    <partial name="_Pager" model="@Model" />
+</div>
