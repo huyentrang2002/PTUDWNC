@@ -199,6 +199,28 @@ namespace TatBlog.Service.Blogs
             return post;
         }
 
+        public async Task<int> CountPostsAsync(
+        PostQuery condition, CancellationToken cancellationToken = default)
+        {
+            return await FilterPosts(condition).CountAsync(cancellationToken: cancellationToken);
+        }
+
+        public async Task<IList<PostInMonthItem>> CountMonthlyPostsAsync(
+            int numMonths, CancellationToken cancellationToken = default)
+        {
+            return await _context.Set<Post>()
+                .GroupBy(x => new { x.PostedDate.Year, x.PostedDate.Month })
+                .Select(g => new PostInMonthItem()
+                {
+                    Year = g.Key.Year,
+                    Month = g.Key.Month,
+                    Count = g.Count(x => x.Published)
+                })
+                .OrderByDescending(x => x.Year)
+                .ThenByDescending(x => x.Month)
+                .ToListAsync(cancellationToken);
+        }
+
         public async Task<Category> CreateOrUpdateCategoryAsync(
         Category category, CancellationToken cancellationToken = default)
         {
@@ -269,28 +291,28 @@ namespace TatBlog.Service.Blogs
                 .FirstOrDefaultAsync(a => a.UrlSlug == slug, cancellationToken);
         }
 
-        public async Task<Author> GetAuthorByIdAsync(int authorId)
-        {
-            return await _context.Set<Author>().FindAsync(authorId);
-        }
+        //public async Task<Author> GetAuthorByIdAsync(int authorId)
+        //{
+        //    return await _context.Set<Author>().FindAsync(authorId);
+        //}
 
-        public async Task<IList<AuthorItem>> GetAuthorsAsync(CancellationToken cancellationToken = default)
-        {
-            return await _context.Set<Author>()
-                .OrderBy(a => a.FullName)
-                .Select(a => new AuthorItem()
-                {
-                    Id = a.Id,
-                    FullName = a.FullName,
-                    Email = a.ToString(),
-                    JoinedDate = a.JoinedDate,
-                    ImageUrl = a.ImageUrl,
-                    UrlSlug = a.UrlSlug,
-                    Notes = a.Notes,
-                    PostCount = a.Posts.Count(p => p.Published)
-                })
-                .ToListAsync(cancellationToken);
-        }
+        //public async Task<IList<AuthorItem>> GetAuthorsAsync(CancellationToken cancellationToken = default)
+        //{
+        //    return await _context.Set<Author>()
+        //        .OrderBy(a => a.FullName)
+        //        .Select(a => new AuthorItem()
+        //        {
+        //            Id = a.Id,
+        //            FullName = a.FullName,
+        //            Email = a.ToString(),
+        //            JoinedDate = a.JoinedDate,
+        //            ImageUrl = a.ImageUrl,
+        //            UrlSlug = a.UrlSlug,
+        //            Notes = a.Notes,
+        //            PostCount = a.Posts.Count(p => p.Published)
+        //        })
+        //        .ToListAsync(cancellationToken);
+        //}
 
         public async Task<IList<Post>> GetPostsAsync(
         PostQuery condition,
@@ -317,16 +339,16 @@ namespace TatBlog.Service.Blogs
                 cancellationToken);
         }
 
-        //public async Task<IPagedList<T>> GetPagedPostsAsync<T>(
-        //    PostQuery condition,
-        //    IPagingParams pagingParams,
-        //    Func<IQueryable<Post>, IQueryable<T>> mapper)
-        //{
-        //    var posts = FilterPosts(condition);
-        //    var projectedPosts = mapper(posts);
+        public async Task<IPagedList<T>> GetPagedPostsAsync<T>(
+            PostQuery condition,
+            IPagingParams pagingParams,
+            Func<IQueryable<Post>, IQueryable<T>> mapper)
+        {
+            var posts = FilterPosts(condition);
+            var projectedPosts = mapper(posts);
 
-        //    return await projectedPosts.ToPagedListAsync(pagingParams);
-        //}
+            return await projectedPosts.ToPagedListAsync(pagingParams);
+        }
 
         #endregion
 

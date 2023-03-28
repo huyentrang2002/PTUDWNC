@@ -87,7 +87,10 @@ public interface IBlogRepository
     //k. Đếm số lượng bài viết trong N tháng gần nhất. N là tham số đầu vào. Kết 
     //quả là một danh sách các đối tượng chứa các thông tin sau: Năm, Tháng, Số
     //bài viết.
-
+    Task<int> CountPostsAsync(
+       PostQuery condition, CancellationToken cancellationToken = default);
+    Task<IList<PostInMonthItem>> CountMonthlyPostsAsync(
+            int numMonths, CancellationToken cancellationToken = default);
 
     //Tìm một bài viết theo mã số
     Task<Post> GetPostByIdAsync(int id, CancellationToken cancellationToken = default);
@@ -105,9 +108,9 @@ public interface IBlogRepository
     //CODE MAU
     Task<bool> TogglePublishedFlagAsync(
         int postId, CancellationToken cancellationToken = default);
-    Task<Author> GetAuthorAsync(string slug, CancellationToken cancellationToken = default);
-    Task<Author> GetAuthorByIdAsync(int authorId);
-    Task<IList<AuthorItem>> GetAuthorsAsync(CancellationToken cancellationToken = default);
+    //Task<Author> GetAuthorAsync(string slug, CancellationToken cancellationToken = default);
+    //Task<Author> GetAuthorByIdAsync(int authorId);
+    //Task<IList<AuthorItem>> GetAuthorsAsync(CancellationToken cancellationToken = default);
 
     Task<IList<Post>> GetPostsAsync(PostQuery condition, int pageNumber, int pageSize, CancellationToken cancellationToken = default);
 
@@ -116,6 +119,11 @@ public interface IBlogRepository
         int pageNumber = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default);
+
+    Task<IPagedList<T>> GetPagedPostsAsync<T>(
+            PostQuery condition,
+            IPagingParams pagingParams,
+            Func<IQueryable<Post>, IQueryable<T>> mapper);
     Task<bool> DeletePostAsync(
        int postId, CancellationToken cancellationToken = default);
 
