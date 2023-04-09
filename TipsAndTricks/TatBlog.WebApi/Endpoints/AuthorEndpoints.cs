@@ -3,6 +3,7 @@ using Mapster;
 using MapsterMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 using TatBlog.Core.Collections;
 using TatBlog.Core.DTO;
 using TatBlog.Core.Entities;
@@ -26,45 +27,49 @@ public static class AuthorEndpoints
         // Nested Map with defined specific route
         routeGroupBuilder.MapGet("/", GetAuthors)
                          .WithName("GetAuthors")
-                         .Produces<PaginationResult<AuthorItem>>();
+                         .Produces<ApiResponse<PaginationResult<AuthorItem>>>();
 
         routeGroupBuilder.MapGet("/{id:int}", GetAuthorDetails)
             .WithName("GetAuthorById")
-            .Produces<AuthorItem>()
-            .Produces(404);
+            .Produces<ApiResponse<AuthorItem>>();
+            //.Produces(404);
 
         routeGroupBuilder.MapGet(
             "/{slug:regex(^[a-z0-9 -]+$)}/posts",
             GetPostsByAuthorsSlug)
             .WithName("GetPostsByAuthorsSlug")
-            .Produces<PaginationResult<PostDto>>();
+            .Produces<ApiResponse<PaginationResult<PostDto>>>();
 
         routeGroupBuilder.MapPost("/", AddAuthor)
             .WithName("AddAuthor")
-            .AddEndpointFilter<ValidatorFilter<AuthorEditModel>>()
-            .Produces(201)
-            .Produces(400)
-            .Produces(409);
+			.AddEndpointFilter<ValidatorFilter<AuthorEditModel>>()
+			//.Produces(201)
+			//.Produces(401)
+			//.Produces(409)
+			.Produces<ApiResponse<AuthorItem>>();
 
         routeGroupBuilder.MapPost("{id:int}/avatar", SetAuthorPicture)
             .WithName("SetAuthorPicture")
             .Accepts<IFormFile>("multipart/form-data")
-            .Produces<string>()
-            .Produces(400);
+            .Produces<ApiResponse<string>>();
+            //.Produces(400);
 
         routeGroupBuilder.MapPut("/{id:int}", UpdateAuthor)
-            .WithName("UpdateAuthor")
-            .AddEndpointFilter<ValidatorFilter<AuthorEditModel>>()
-            .Produces(204)
-            .Produces(400)
-            .Produces(409);
+			.WithName("UpdateAuthor")
+			//.AddEndpointFilter<ValidatorFilter<AuthorEditModel>>()
+			//.Produces(204)
+			//.Produces(400)
+			//.Produces(409);
+			.Produces<ApiResponse<string>>();
 
-        routeGroupBuilder.MapDelete("/{id:int}", DeleteAuthor)
+
+		routeGroupBuilder.MapDelete("/{id:int}", DeleteAuthor)
             .WithName("DeleteAuthor")
-            .Produces(204)
-            .Produces(404);
+            //.Produces(204)
+            //.Produces(404)
+			.Produces<ApiResponse<string>>();
 
-        return app;
+		return app;
     }
 
     //Xử lý yêu cầu tìm và lấy danh sách sách tác giả
@@ -72,13 +77,13 @@ public static class AuthorEndpoints
         [AsParameters] AuthorFilterModel model,
         IAuthorRepository authorRepository)
     {
-        var authorsList = await authorRepository
-            .GetPagedAuthorsAsync(model, model.Name);
+        var authorsList = await 
+            authorRepository.GetPagedAuthorsAsync(model, model.Name);
 
         var paginationResult =
             new PaginationResult<AuthorItem>(authorsList);
 
-        return Results.Ok(paginationResult);
+        return Results.Ok(ApiResponse.Success(paginationResult));
     }
     //Xem chi tiết tác giả
     private static async Task<IResult> GetAuthorDetails(
@@ -87,9 +92,11 @@ public static class AuthorEndpoints
         IMapper mapper)
     {
         var author = await authorRepository.GetCachedAuthorByIdAsync(id);
+
         return author == null
-            ? Results.NotFound($"Không tìm thấy tác giả có mã số {id}")
-            : Results.Ok(mapper.Map<AuthorItem>(author));
+            ? Results.Ok(ApiResponse.Fail(HttpStatusCode.NotFound, 
+            $"Không tìm thấy tac giả có mã số {id}"))
+            : Results.Ok(ApiResponse.Success(mapper.Map<AuthorItem>(author)));
     }
 
     //Lấy bài viết theo Id của Tác giả
@@ -110,10 +117,11 @@ public static class AuthorEndpoints
 
         var paginationResult = new PaginationResult<PostDto>(postList);
 
-        return Results.Ok(paginationResult);
-    }
-    //Lay bai viet theo dinh danh slug (tac gia)
-    private static async Task<IResult> GetPostsByAuthorsSlug(
+		return Results.Ok(ApiResponse.Success(paginationResult));
+
+	}
+	//Lay bai viet theo dinh danh slug (tac gia)
+	private static async Task<IResult> GetPostsByAuthorsSlug(
         [FromRoute] string slug,
         [AsParameters] PagingModel pagingModel,
         IBlogRepository blogRepository)
@@ -129,11 +137,12 @@ public static class AuthorEndpoints
         
         var paginationResult = new PaginationResult<PostDto>(postList);
 
-        return Results.Ok(paginationResult);
-    }
-    
-    //Thêm tác giả
-    private static async Task<IResult> AddAuthor(
+		return Results.Ok(ApiResponse.Success(paginationResult));
+
+	}
+
+	//Thêm tác giả
+	private static async Task<IResult> AddAuthor(
         AuthorEditModel model,
         IValidator<AuthorEditModel> validator,
         IAuthorRepository authorRepository,
@@ -148,16 +157,16 @@ public static class AuthorEndpoints
         if(await authorRepository
             .IsAuthorSlugExistedAsync(0, model.UrlSlug))
         {
-            return Results.Conflict(
-                $"Slug '{model.UrlSlug}' đã được sử dụng");   
+            return Results.Ok(ApiResponse.Fail(HttpStatusCode.Conflict,
+                $"Slug '{model.UrlSlug}' đã được sử dụng"));   
         }
 
         var author = mapper.Map<Author>(model);
         await authorRepository.AddOrUpdateAsync(author);
 
-        return Results.CreatedAtRoute(
-            "GetAuthorById", new { author.Id },
-            mapper.Map<AuthorItem>(author));
+        return Results.Ok(ApiResponse.Success(            
+            mapper.Map<AuthorItem>(author),
+            HttpStatusCode.Created));
     }
 
     //Thêm ảnh cho tác giả
@@ -172,11 +181,12 @@ public static class AuthorEndpoints
             imageFile.ContentType);
         if (string.IsNullOrWhiteSpace(imageUrl))
         {
-            return Results.BadRequest("Không lưu được tập tin");
+            return Results.Ok(ApiResponse.Fail(
+                HttpStatusCode.BadRequest, "Không lưu được tập tin"));
         }
 
         await authorRepository.SetImageUrlAsync(id, imageUrl);
-        return Results.Ok(imageUrl);
+        return Results.Ok(ApiResponse.Success(imageUrl));
     }
 
     //Cập nhật thông tin tác giả
@@ -195,16 +205,19 @@ public static class AuthorEndpoints
         if(await authorRepository
             .IsAuthorSlugExistedAsync(id, model.UrlSlug))
         {
-            return Results.Conflict(
-                $"Slug '{model.UrlSlug}' đã được sử dụng");
+            return Results.Ok(ApiResponse.Fail(
+                HttpStatusCode.Conflict,
+                $"Slug '{model.UrlSlug}' đã được sử dụng"));
         }
 
         var author = mapper.Map<Author>(model);
         author.Id = id;
 
         return await authorRepository.AddOrUpdateAsync(author)
-            ? Results.NoContent()
-            : Results.NotFound();
+            ? Results.Ok(ApiResponse.Success("Author is updated",
+            HttpStatusCode.NoContent))
+            : Results.Ok(ApiResponse.Fail(HttpStatusCode.NotFound,
+            "Could not find author"));
     }
 
     // Xóa tác giả
@@ -212,9 +225,11 @@ public static class AuthorEndpoints
         int id, IAuthorRepository authorRepository)
     {
         return await authorRepository.DeleteAuthorAsync(id)
-            ?Results.NoContent()
-            :Results.NotFound($"không tìm thấy tác giả có id = {id}");
-    }
+			? Results.Ok(ApiResponse.Success("Author is deleted",
+			HttpStatusCode.NoContent))
+			: Results.Ok(ApiResponse.Fail(HttpStatusCode.NotFound,
+			"Could not find author"));
+	}
 }
 
 

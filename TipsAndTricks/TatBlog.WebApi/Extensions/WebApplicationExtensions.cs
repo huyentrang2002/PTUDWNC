@@ -25,10 +25,15 @@ public static class WebApplicationExtensions
             .AddScoped<IMediaManager, LocalFileSystemMediaManager>();
         builder.Services
             .AddScoped<IBlogRepository, BlogRepository>();
-        builder.Services
-            .AddScoped<IAuthorRepository, AuthorRepository>();
 
-        return builder;
+		builder.Services
+		  .AddScoped<IPostRepository, PostRepository>();
+		builder.Services
+            .AddScoped<IAuthorRepository, AuthorRepository>();
+		builder.Services
+			.AddScoped<ICateRepository, CategoryRepository>();
+
+		return builder;
     }
 
     public static WebApplicationBuilder ConfigureCos(

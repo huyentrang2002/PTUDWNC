@@ -1,6 +1,7 @@
 ﻿namespace TatBlog.WebApi.Models;
 public class PostDetail
 {
+    public bool Pulished { get; set; }
     //Ma bai viet
     public int Id { get; set; }
 

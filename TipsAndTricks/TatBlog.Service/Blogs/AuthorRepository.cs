@@ -74,26 +74,26 @@ public class AuthorRepository : IAuthorRepository
 			.ToListAsync(cancellationToken);
 	}
 
-	public async Task<IPagedList<AuthorItem>> GetPagedAuthorsAsync(
-		IPagingParams pagingParams,
-		string name = null,
-		CancellationToken cancellationToken = default)
-	{
-		return await _context.Set<Author>()
-			.AsNoTracking()
-			.Where(x => x.FullName.Contains(name))
-			.Select(a => new AuthorItem()
-			{
-				Id = a.Id,
-				FullName = a.FullName,
-				Email = a.Email,
-				JoinedDate = a.JoinedDate,
-				ImageUrl = a.ImageUrl,
-				UrlSlug = a.UrlSlug,
-				PostCount = a.Posts.Count(p => p.Published)
-			})
-			.ToPagedListAsync(pagingParams, cancellationToken);
-	}
+	//public async Task<IPagedList<AuthorItem>> GetPagedAuthorsAsync(
+	//	IPagingParams pagingParams,
+	//	string name = null,
+	//	CancellationToken cancellationToken = default)
+	//{
+	//	return await _context.Set<Author>()
+	//		.AsNoTracking()
+	//		.Where(x => x.FullName.Contains(name))
+	//		.Select(a => new AuthorItem()
+	//		{
+	//			Id = a.Id,
+	//			FullName = a.FullName,
+	//			Email = a.Email,
+	//			JoinedDate = a.JoinedDate,
+	//			ImageUrl = a.ImageUrl,
+	//			UrlSlug = a.UrlSlug,
+	//			PostCount = a.Posts.Count(p => p.Published)
+	//		})
+	//		.ToPagedListAsync(pagingParams, cancellationToken);
+	//}
 
 	public async Task<IPagedList<T>> GetPagedAuthorsAsync<T>(
 		Func<IQueryable<Author>, IQueryable<T>> mapper,
@@ -112,6 +112,28 @@ public class AuthorRepository : IAuthorRepository
 			.ToPagedListAsync(pagingParams, cancellationToken);
 	}
 
+	public async Task<IPagedList<AuthorItem>> GetPagedAuthorsAsync(
+			IPagingParams pagingParams,
+			string name = null,
+			CancellationToken cancellationToken = default)
+	{
+		IQueryable<Author> AuthorQuery = _context.Set<Author>().AsNoTracking();
+		if (!string.IsNullOrWhiteSpace(name))
+		{
+			AuthorQuery = AuthorQuery.Where(x => x.FullName.Contains(name));
+		}
+		return await AuthorQuery.Select(a => new AuthorItem()
+		{
+			Id = a.Id,
+			FullName = a.FullName,
+			Email = a.Email,
+			JoinedDate = a.JoinedDate,
+			ImageUrl = a.ImageUrl,
+			UrlSlug = a.UrlSlug,
+			PostCount = a.Posts.Count(p => p.Published)
+		})
+			.ToPagedListAsync(pagingParams, cancellationToken);
+	}
 	public async Task<bool> AddOrUpdateAsync(
 		Author author, CancellationToken cancellationToken = default)
 	{
