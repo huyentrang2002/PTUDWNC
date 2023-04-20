@@ -3,8 +3,8 @@
     public class PostInMonthItem
     {
         public int Count { get; set; }
-        public string Year { get; set; }
-        public string Month { get; set; }
+        public int Year { get; set; }
+        public int Month { get; set; }
     }
 
 }

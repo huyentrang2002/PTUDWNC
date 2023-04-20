@@ -1,73 +1,180 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Linq.Dynamic.Core;
+using Microsoft.Extensions.Caching.Memory;
 using TatBlog.Core.Contracts;
 using TatBlog.Core.DTO;
 using TatBlog.Core.Entities;
 using TatBlog.Data.Contexts;
 using TatBlog.Service.Blogs;
 using TatBlog.Service.Extensions;
+
+
+namespace TatBlog.Services.Blogs;
+
 public class AuthorRepository : IAuthorRepository
 {
-    private readonly BlogDbContext _context;
-    public AuthorRepository(BlogDbContext context)
-    {
-        _context = context;
-    }
+	private readonly BlogDbContext _context;
+	private readonly IMemoryCache _memoryCache;
 
-    //2b.Tìm một tác giả theo mã số.
-    public async Task<Author> GetAuthorByIdAsync(int id, 
-        CancellationToken cancellationToken)
-    {
-        var author = await _context.Authors
-            .FindAsync(id, cancellationToken);
-        return author;
-    }
-    
-    //2c. Tìm một tác giả theo tên định danh (slug).
-    public async Task<Author> GetAuthorBySlugAsync(string slug, 
-        CancellationToken cancellationToken)
-    {
-        var tagQuery =  _context.Authors
-            .FindAsync(slug, cancellationToken);
-        return await tagQuery;
-    }
+	public AuthorRepository(BlogDbContext context, IMemoryCache memoryCache)
+	{
+		_context = context;
+		_memoryCache = memoryCache;
+	}
 
-    //2d. Lấy và phân trang danh sách tác giả kèm theo số lượng bài viết của tác giả đó.Kết quả trả về kiểu IPagedList<AuthorItem>.
-    public async Task<IPagedList<AuthorItem>> GetAuthorsAsync(IPagingParams pagingParams, CancellationToken cancellationToken = default)
-    {
-        var tagQuery = _context.Set<Author>()
-                                  .Select(x => new AuthorItem()
-                                  {
-                                      Id = x.Id,
-                                      FullName = x.FullName,
-                                      UrlSlug = x.UrlSlug,
-                                      ImageUrl = x.ImageUrl,
-                                      JoinedDate = x.JoinedDate,
-                                      Notes = x.Notes,
-                                      PostCount = x.Posts.Count(p => p.Published)
-                                  });
+	public async Task<Author> GetAuthorBySlugAsync(
+		string slug, CancellationToken cancellationToken = default)
+	{
+		return await _context.Set<Author>()
+			.FirstOrDefaultAsync(a => a.UrlSlug == slug, cancellationToken);
+	}
 
-        return await tagQuery.ToPagedListAsync(pagingParams, cancellationToken);
-    }
-    //2e. Thêm hoặc cập nhật thông tin một tác giả
-    public async Task AddOrUpdateAuthorAsync(Author author, CancellationToken cancellationToken = default)
-    {
-        var auth = await _context.Authors
-            .FirstOrDefaultAsync(a => a.Id == author.Id);
-        
-        auth.FullName = author.FullName;
-        auth.UrlSlug = author.UrlSlug;
-        auth.JoinedDate = author.JoinedDate;
-        auth.Email = author.Email;
-        auth.Notes = author.Notes;
+	public async Task<Author> GetCachedAuthorBySlugAsync(
+		string slug, CancellationToken cancellationToken = default)
+	{
+		return await _memoryCache.GetOrCreateAsync(
+			$"author.by-slug.{slug}",
+			async (entry) =>
+			{
+				entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
+				return await GetAuthorBySlugAsync(slug, cancellationToken);
+			});
+	}
 
-        _context.Attach(auth).State = EntityState.Modified;
-         await _context.SaveChangesAsync();
-    }
+	public async Task<Author> GetAuthorByIdAsync(int authorId)
+	{
+		return await _context.Set<Author>().FindAsync(authorId);
+	}
 
-    //2f. Tìm danh sách N tác giả có nhiều bài viết nhất. N là tham số đầu vào
+	public async Task<Author> GetCachedAuthorByIdAsync(int authorId)
+	{
+		return await _memoryCache.GetOrCreateAsync(
+			$"author.by-id.{authorId}",
+			async (entry) =>
+			{
+				entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30);
+				return await GetAuthorByIdAsync(authorId);
+			});
+	}
 
+	public async Task<IList<AuthorItem>> GetAuthorsAsync(
+		CancellationToken cancellationToken = default)
+	{
+		return await _context.Set<Author>()
+			.OrderBy(a => a.FullName)
+			.Select(a => new AuthorItem()
+			{
+				Id = a.Id,
+				FullName = a.FullName,
+				Email = a.Email,
+				JoinedDate = a.JoinedDate,
+				ImageUrl = a.ImageUrl,
+				UrlSlug = a.UrlSlug,
+				PostCount = a.Posts.Count(p => p.Published)
+			})
+			.ToListAsync(cancellationToken);
+	}
 
+	//public async Task<IPagedList<AuthorItem>> GetPagedAuthorsAsync(
+	//	IPagingParams pagingParams,
+	//	string name = null,
+	//	CancellationToken cancellationToken = default)
+	//{
+	//	return await _context.Set<Author>()
+	//		.AsNoTracking()
+	//		.Where(x => x.FullName.Contains(name))
+	//		.Select(a => new AuthorItem()
+	//		{
+	//			Id = a.Id,
+	//			FullName = a.FullName,
+	//			Email = a.Email,
+	//			JoinedDate = a.JoinedDate,
+	//			ImageUrl = a.ImageUrl,
+	//			UrlSlug = a.UrlSlug,
+	//			PostCount = a.Posts.Count(p => p.Published)
+	//		})
+	//		.ToPagedListAsync(pagingParams, cancellationToken);
+	//}
 
+	public async Task<IPagedList<T>> GetPagedAuthorsAsync<T>(
+		Func<IQueryable<Author>, IQueryable<T>> mapper,
+		IPagingParams pagingParams,
+		string name = null,
+		CancellationToken cancellationToken = default)
+	{
+		var authorQuery = _context.Set<Author>().AsNoTracking();
+
+		if (!string.IsNullOrEmpty(name))
+		{
+			authorQuery = authorQuery.Where(x => x.FullName.Contains(name));
+		}
+
+		return await mapper(authorQuery)
+			.ToPagedListAsync(pagingParams, cancellationToken);
+	}
+
+	public async Task<IPagedList<AuthorItem>> GetPagedAuthorsAsync(
+			IPagingParams pagingParams,
+			string name = null,
+			CancellationToken cancellationToken = default)
+	{
+		IQueryable<Author> AuthorQuery = _context.Set<Author>().AsNoTracking();
+		if (!string.IsNullOrWhiteSpace(name))
+		{
+			AuthorQuery = AuthorQuery.Where(x => x.FullName.Contains(name));
+		}
+		return await AuthorQuery.Select(a => new AuthorItem()
+		{
+			Id = a.Id,
+			FullName = a.FullName,
+			Email = a.Email,
+			JoinedDate = a.JoinedDate,
+			ImageUrl = a.ImageUrl,
+			UrlSlug = a.UrlSlug,
+			PostCount = a.Posts.Count(p => p.Published)
+		})
+			.ToPagedListAsync(pagingParams, cancellationToken);
+	}
+	public async Task<bool> AddOrUpdateAsync(
+		Author author, CancellationToken cancellationToken = default)
+	{
+		if (author.Id > 0)
+		{
+			_context.Authors.Update(author);
+			_memoryCache.Remove($"author.by-id.{author.Id}");
+		}
+		else
+		{
+			_context.Authors.Add(author);
+		}
+
+		return await _context.SaveChangesAsync(cancellationToken) > 0;
+	}
+	
+	public async Task<bool> DeleteAuthorAsync(
+		int authorId, CancellationToken cancellationToken = default)
+	{
+		return await _context.Authors
+			.Where(x => x.Id == authorId)
+			.ExecuteDeleteAsync(cancellationToken) > 0;
+	}
+
+	public async Task<bool> IsAuthorSlugExistedAsync(
+		int authorId, 
+		string slug, 
+		CancellationToken cancellationToken = default)
+	{
+		return await _context.Authors
+			.AnyAsync(x => x.Id != authorId && x.UrlSlug == slug, cancellationToken);
+	}
+
+	public async Task<bool> SetImageUrlAsync(
+		int authorId, string imageUrl,
+		CancellationToken cancellationToken = default)
+	{
+		return await _context.Authors
+			.Where(x => x.Id == authorId)
+			.ExecuteUpdateAsync(x => 
+				x.SetProperty(a => a.ImageUrl, a => imageUrl), 
+				cancellationToken) > 0;
+	}
 }
