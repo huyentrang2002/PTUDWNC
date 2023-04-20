@@ -3,31 +3,31 @@ import ListGroup from 'react-bootstrap/ListGroup'
 import { Link } from "react-router-dom";
 import { getCategories } from "../Services/Widgets";
 
-const CategoriesWidget = () =>{
+const CategoriesWidget = () => {
     const [categoryList, setCategoryList] = useState([])
 
     useEffect(() => {
-        getCategories().then(data =>{
-            if(data)
+        getCategories().then(data => {
+            if (data)
                 setCategoryList(data.items)
             else
                 setCategoryList([])
         })
-    },[])
+    }, [])
 
-    return(
+    return (
         <div className="mb-4">
             <h3 className="text-success mb-2">
                 Các chủ đề
             </h3>
-            {categoryList.length >0 &&
+            {categoryList.length > 0 &&
                 <ListGroup>
-                    {categoryList.map((item, index)=>{
-                        return(
+                    {categoryList.map((item, index) => {
+                        return (
                             <ListGroup.Item key={index}>
                                 <Link to={`/blog/category?slug=${item.urlSlug}`}
-                                      title={item.description}
-                                      key={index}
+                                    title={item.description}
+                                    key={index}
                                 >
                                     {item.name}
                                     <span>&nbsp;({item.postCount})</span>

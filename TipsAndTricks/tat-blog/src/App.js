@@ -16,7 +16,10 @@ import Authors from './Pages/Admin/Authors';
 import Categories from './Pages/Admin/Categories';
 import Comments from './Pages/Admin/Comments';
 import Posts from './Pages/Admin/Post/Posts';
+import Edit from './Pages/Admin/Post/Edit';
 import Tags from './Pages/Admin/Tags';
+import NotFound from './Pages/NotFound';
+import BadRequest from './Pages/BadRequest';
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
@@ -41,7 +44,13 @@ function App() {
           <Route path='/admin/comments' element={<Comments/>}/>
           <Route path='/admin/posts' element={<Posts/>}/>
           <Route path='/admin/tags' element={<Tags/>}/>
+
+          <Route path='/admin/posts/edit' element={<Edit />} />  
+          <Route path='/admin/posts/edit/:id' element={<Edit />} />  
+
         </Route>          
+          <Route path='*' element={<NotFound/>}/>
+          <Route path='/400' element={<BadRequest/>}/>
       </Routes>
     </Router>
   );

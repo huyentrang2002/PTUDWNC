@@ -264,6 +264,7 @@ public static class PostEndpoints
 			: Results.NotFound($"could not find post with id={id}");
 	}
 
+	[EnableCors("TatBlogApp")]
 	private static async Task<IResult> GetFilter(
 		IAuthorRepository authorRepository,
 		IBlogRepository blogRepository)
