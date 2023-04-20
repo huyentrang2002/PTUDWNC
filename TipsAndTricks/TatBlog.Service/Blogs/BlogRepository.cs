@@ -510,9 +510,54 @@ namespace TatBlog.Service.Blogs
         }
 
         //1o. Lấy ngẫu nhiên N bài viết. N là tham số đầu vào.
-        public Task<IList<Post>> GetRandomPostAsync(int n, CancellationToken cancellationToken = default)
+        public async Task<IList<Post>> GetRandomPostAsync(int n, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            return await _context.Set<Post>()
+               .OrderBy(x => Guid.NewGuid())
+               .Take(n)
+               .ToListAsync(cancellationToken);
+        }
+
+        public async Task<Tag> GetTagAsync(
+        string slug, CancellationToken cancellationToken = default)
+        {
+            return await _context.Set<Tag>()
+                .FirstOrDefaultAsync(x => x.UrlSlug == slug, cancellationToken);
+        }
+
+        public async Task<IList<AuthorItem>> ListAuthorAsync(int N, CancellationToken cancellationToken = default)
+        {
+            return await _context.Set<Author>()
+           .Select(x => new AuthorItem()
+           {
+               Id = x.Id,
+               FullName = x.FullName,
+               UrlSlug = x.UrlSlug,
+               ImageUrl = x.ImageUrl,
+               JoinedDate = x.JoinedDate,
+               Email = x.Email,
+               Notes = x.Notes,
+               PostCount = x.Posts.Count(p => p.Published)
+           })
+           .OrderByDescending(x => x.PostCount)
+           .Take(N)
+           .ToListAsync(cancellationToken);
+        }
+
+        public async Task<IList<TagItem>> GetTagsAsync(
+        CancellationToken cancellationToken = default)
+        {
+            return await _context.Set<Tag>()
+                .OrderBy(x => x.Name)
+                .Select(x => new TagItem()
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    UrlSlug = x.UrlSlug,
+                    Description = x.Description,
+                    PostCount = x.Posts.Count(p => p.Published)
+                })
+                .ToListAsync(cancellationToken);
         }
 
         //Cau 1s -- lab02 -- CAN HOI THEM     

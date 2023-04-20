@@ -13,6 +13,8 @@ public class PostQuery
     public int? CategoryId { get; set; }
     public string Slug { get; set; }
     public string PostedDate { get; set; }
+    public int PostYear { get; set; }
+    public int PostMonth { get; set; }
     public string Tags { get; set; }
     public IList<string> SelectedTag { get; set; }
     public IEnumerable<string> SelectedAuthor { get; set; }

@@ -23,18 +23,33 @@ public static class RouteExtensions
         pattern: "blog/author/{slug}",
         defaults: new { controller = "Blog", action = "Author" });
 
+        //endpoints.MapControllerRoute(
+        //    name: "single-post",
+        //    pattern: "blog/post/{year:int}/{month:int}/{day:int}/{slug}",
+        //    defaults: new { controller = "Blog", action = "Post" });
         endpoints.MapControllerRoute(
-            name: "single-post",
-            pattern: "blog/post/{year:int}/{month:int}/{day:int}/{slug}",
-            defaults: new { controller = "Blog", action = "Post" });
+              name: "post-info",
+              pattern: "blog/postinfo/{year:int}/{month:int}/{day:int}/{slug}",
+              defaults: new { controller = "Blog", action = "PostInfo" });
 
-        //khu vực quản trị
+        //endpoints.MapControllerRoute(
+        //    name: "admin-area",
+        //    pattern: "admin/{controller=Dashboard}/{action=Index}/{id?}",
+        //    defaults: new { area = "Admin" });
+
+        //featured
         endpoints.MapControllerRoute(
-            name: "admin-area",
-            pattern: "admin/{controller=Dashboard}/{action=Index}/{id?}",
-            defaults: new { area = "Admin" });
+            name: "featured-post",
+            pattern: "blog/featuredposts/{slug}/{view}",
+            defaults: new { controller = "Blog", action = "FeaturedPosts" });
 
 
+        endpoints.MapControllerRoute(
+            name: "random-post",
+            pattern: "blog/featuredposts/{slug}/{view}",
+            defaults: new { controller = "Blog", action = "RandomPosts" });
+
+        
         endpoints.MapControllerRoute(
             name: "default",
             pattern: "{controller=Blog}/{action=Index}/{id?}");

@@ -10,7 +10,7 @@ public interface IBlogRepository
     //duoc dang vao thang, nam
     Task<Post> GetPostAsyn(
         int year,
-        int month,
+        int month,  
         string slug,
         CancellationToken cancellationToken = default);
 
@@ -105,12 +105,17 @@ public interface IBlogRepository
     //Lấy ngẫu nhiên N bài viết. N là tham số đầu vào
     Task<IList<Post>> GetRandomPostAsync(int n, CancellationToken cancellationToken = default);
 
-    //CODE MAU
-    Task<bool> TogglePublishedFlagAsync(
+    //CODE MAU    Task<bool> TogglePublishedFlagAsync(
         int postId, CancellationToken cancellationToken = default);
     //Task<Author> GetAuthorAsync(string slug, CancellationToken cancellationToken = default);
     //Task<Author> GetAuthorByIdAsync(int authorId);
     //Task<IList<AuthorItem>> GetAuthorsAsync(CancellationToken cancellationToken = default);
+    Task<Tag> GetTagAsync(
+        string slug, CancellationToken cancellationToken = default);
+
+    Task<IList<AuthorItem>> ListAuthorAsync(int N, CancellationToken cancellationToken = default);
+
+    Task<IList<TagItem>> GetTagsAsync(CancellationToken cancellationToken = default);
 
     Task<IList<Post>> GetPostsAsync(PostQuery condition, int pageNumber, int pageSize, CancellationToken cancellationToken = default);
 

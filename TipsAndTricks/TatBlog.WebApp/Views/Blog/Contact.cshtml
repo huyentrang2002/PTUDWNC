@@ -1,6 +1,48 @@
-﻿@{
+﻿@*@{
 	ViewData["PageTittle"] = "Liên hệ";
 }
 <h1>
 	Đây là trang liên hệ
-</h1>
+</h1>*@
+@{
+    ViewData["PageTitle"] = "Liên hệ";
+}
+<main role="main">
+    <div class="container mt-2">
+        <h1 class="text-center">Thông tin Liên hệ</h1>
+        <div class="row">
+            <div class="col col-md-6">
+                <img src="~/images/11.jpg" width="50%">
+            </div>
+            <div class="col col-md-6">
+                <form method="post" action="https://www.facebook.com/profile.php?viewas=1000006868993...67890742">
+                    <div class="form-group">
+                        <label for="email">Email*</label>
+                        <input type="email" class="form-control" id="email" name="email"
+                               placeholder="Email của bạn">
+                    </div>
+                    <div class="form-group">
+                        <label for="SĐT">SĐT*</label>
+                        <input type="SĐT" class="form-control" id="SĐT" name="SĐT"
+                               placeholder="SĐT của bạn">
+                    </div>
+                    <div class="form-group">
+                        <label for="title">Tiêu đề*</label>
+                        <input type="text" class="form-control" id="title" name="title"
+                               placeholder="Tiêu đề của bạn">
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Lời nhắn*</label>
+                        <textarea name="message" class="form-control"></textarea>
+                    </div>
+                    <button class="btn btn-primary" name="btnGoiLoiNhan">Gửi lời nhắn</button>
+                </form> 
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col col-md-12">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d15731.951090496856!2d105.568023!3d9.682084!3m2!1i1024!2i768!4f13.1!5e0!3m2!1svi!2s!4v1679843078906!5m2!1svi!2s" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                        
+            </div>
+        </div>
+    </div>
